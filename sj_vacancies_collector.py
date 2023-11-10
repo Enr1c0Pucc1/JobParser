@@ -1,19 +1,9 @@
 import requests
-from dotenv import load_dotenv
-import os
-from main_functions import predict_rub_salary_sj, draw_table
+from help_functions import predict_rub_salary_sj
 
 
-def predict_rub_salary_for_superjob(vacancy):
-    if vacancy['currency'] != 'rub':
-        return None
-    return predict_rub_salary_sj(vacancy)
-
-
-def get_vacancies_from_sj(lang, page):
-    load_dotenv()
-    superjob_key = os.environ["SJ_API_KEY"]
-    headers = {"X-Api-App-Id": superjob_key}
+def get_vacancies_from_sj(lang, page, api_key):
+    headers = {"X-Api-App-Id": api_key}
     params = {'town': 4,
               'keyword': lang,
               'catalogues': 48,
@@ -23,22 +13,22 @@ def get_vacancies_from_sj(lang, page):
                             headers=headers,
                             params=params)
     response.raise_for_status()
-    objects = response.json()
-    return objects['objects'], objects['total']
+    vacancies = response.json()
+    return vacancies['objects'], vacancies['total']
 
 
-def get_average_salary_sj(programming_languages):
+def average_salary_sj(programming_languages, api_key):
     salaries_by_lang = {}
     vacancies_number_limit = 500
-    for i, plang in enumerate(programming_languages, start=0):
+    for plang in programming_languages:
         pages = 1
         page = 0
         vacancies_found = 0
-        vacancies_processed = 0
-        salaries = 0
+        vacancies_prcssd = 0
+        vacancies_with_salaries = 0
         while page < pages:
-            vacancies, total = get_vacancies_from_sj(programming_languages[i],
-                                                     page)
+            vacancies, total = get_vacancies_from_sj(plang,
+                                                     page, api_key)
             if total > vacancies_number_limit:
                 pages = vacancies_number_limit // 500
             elif total == 0:
@@ -48,20 +38,19 @@ def get_average_salary_sj(programming_languages):
             else:
                 pages = total // 100
             page += 1
-            for m, vacancy in enumerate(vacancies, start=1):
-                salary = predict_rub_salary_for_superjob(vacancy)
+            for vacancy in vacancies:
+                salary = predict_rub_salary_sj(vacancy)
                 vacancies_found += 1
                 if salary:
-                    vacancies_processed += 1
-                    salaries += salary
+                    vacancies_prcssd += 1
+                    vacancies_with_salaries += salary
+                if vacancies_prcssd != 0:
+                    average_salary = vacancies_with_salaries//vacancies_prcssd
+                else:
+                    average_salary = 'N/A'
             salaries_by_lang[plang] = {
                 'vacancies_found': vacancies_found,
-                'vacancies_processed': vacancies_processed,
-                'average_salary': (salaries//vacancies_processed)
+                'vacancies_processed': vacancies_prcssd,
+                'average_salary': average_salary
                 }
     return salaries_by_lang
-
-
-def draw_superjob_statistic(languages):
-    sj_statistic = get_average_salary_sj(languages)
-    return draw_table(sj_statistic, "SuperJob Moscow")
