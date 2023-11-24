@@ -1,3 +1,4 @@
+import requests
 from terminaltables import DoubleTable
 
 
@@ -30,6 +31,26 @@ def predict_rub_salary_sj(vacancy):
     salary_to = vacancy.get('payment_to')
     average = calculate_average(salary_from, salary_to)
     return average
+
+
+def count_prcssd_vacancies(vacancies_prcssd, vacancies_with_salaries):
+    if vacancies_prcssd:
+        average_salary = vacancies_with_salaries//vacancies_prcssd
+    else:
+        average_salary = 'N/A'
+    return average_salary
+
+
+def get_pages_for_hh(lang, area, per_page, period):
+    params = {
+        'text': lang,
+        'area': area,
+        'per_page': per_page,
+        'period': period
+    }
+    response = requests.get('https://api.hh.ru/vacancies', params=params)
+    response.raise_for_status()
+    return response.json()['pages']
 
 
 def draw_table(vacancies_statistic, title):
