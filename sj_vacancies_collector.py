@@ -1,5 +1,5 @@
 import requests
-from help_functions import predict_rub_salary_sj, count_processed_vacancies
+from help_functions import predict_rub_salary_sj, count_prcssd_vacancies
 
 
 def get_vacancies_from_sj(area, lang, catalogues, per_page, page, api_key):
@@ -14,7 +14,7 @@ def get_vacancies_from_sj(area, lang, catalogues, per_page, page, api_key):
                             params=params)
     response.raise_for_status()
     vacancies = response.json()
-    return vacancies['total'], vacancies['objects'], vacancies['more']
+    return vacancies['objects'], vacancies['more']
 
 
 def get_average_salary_sj(programming_languages, api_key):
@@ -26,27 +26,27 @@ def get_average_salary_sj(programming_languages, api_key):
         pages_left = True
         page = 0
         vacancies_found = 0
-        vacancies_processed = 0
-        salaries = 0
+        vacancies_prcssd = 0
+        vacancies_with_salary = 0
         while pages_left:
-            vacancies_found, vacancies, pages_left = get_vacancies_from_sj(
-                area,
-                programming_language,
-                catalogue,
-                per_page,
-                page,
-                api_key)
+            vacancies, pages_left = get_vacancies_from_sj(area,
+                                                          programming_language,
+                                                          catalogue,
+                                                          per_page,
+                                                          page,
+                                                          api_key)
             page += 1
             for vacancy in vacancies:
                 salary = predict_rub_salary_sj(vacancy)
+                vacancies_found += 1
                 if salary:
-                    vacancies_processed += 1
-                    salaries += salary
-                average_salary = count_processed_vacancies(vacancies_processed,
-                                                           salaries)
-        salaries_by_lang[programming_language] = {
-            'vacancies_processed': vacancies_processed,
-            'vacancies_found': vacancies_found,
-            'average_salary': average_salary
-        }
+                    vacancies_prcssd += 1
+                    vacancies_with_salary += salary
+                average_salary = count_prcssd_vacancies(vacancies_prcssd,
+                                                        vacancies_with_salary)
+            salaries_by_lang[programming_language] = {
+                'vacancies_found': vacancies_found,
+                'vacancies_processed': vacancies_prcssd,
+                'average_salary': average_salary
+                }
     return salaries_by_lang
