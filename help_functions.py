@@ -33,9 +33,9 @@ def predict_rub_salary_sj(vacancy):
     return average
 
 
-def count_prcssd_vacancies(vacancies_prcssd, vacancies_with_salaries):
-    if vacancies_prcssd:
-        average_salary = vacancies_with_salaries//vacancies_prcssd
+def count_processed_vacancies(vacancies_processed, vacancies_with_salaries):
+    if vacancies_processed:
+        average_salary = vacancies_with_salaries//vacancies_processed
     else:
         average_salary = 'N/A'
     return average_salary
