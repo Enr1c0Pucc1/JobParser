@@ -1,4 +1,3 @@
-import requests
 from terminaltables import DoubleTable
 
 
@@ -39,18 +38,6 @@ def count_processed_vacancies(vacancies_processed, vacancies_with_salaries):
     else:
         average_salary = 'N/A'
     return average_salary
-
-
-def get_pages_for_hh(lang, area, per_page, period):
-    params = {
-        'text': lang,
-        'area': area,
-        'per_page': per_page,
-        'period': period
-    }
-    response = requests.get('https://api.hh.ru/vacancies', params=params)
-    response.raise_for_status()
-    return response.json()['pages']
 
 
 def draw_table(vacancies_statistic, title):
