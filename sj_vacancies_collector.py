@@ -27,7 +27,7 @@ def get_average_salary_sj(programming_languages, api_key):
         page = 0
         vacancies_found = 0
         vacancies_processed = 0
-        salaries = 0
+        salary_sum = 0
         while pages_left:
             vacancies_found, vacancies, pages_left = get_vacancies_from_sj(
                 area,
@@ -41,9 +41,9 @@ def get_average_salary_sj(programming_languages, api_key):
                 salary = predict_rub_salary_sj(vacancy)
                 if salary:
                     vacancies_processed += 1
-                    salaries += salary
-                average_salary = count_processed_vacancies(vacancies_processed,
-                                                           salaries)
+                    salary_sum += salary
+            average_salary = count_processed_vacancies(vacancies_processed,
+                                                       salary_sum)
         salaries_by_lang[programming_language] = {
             'vacancies_processed': vacancies_processed,
             'vacancies_found': vacancies_found,
