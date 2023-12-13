@@ -1,15 +1,13 @@
 import requests
 from help_functions import predict_rub_salary_hh
-from help_functions import count_processed_vacancies, get_pages_for_hh
+from help_functions import count_processed_vacancies
 
 
 def get_vacancies_from_hh(lang, area, per_page, period):
-    pages_number = get_pages_for_hh(lang,
-                                    area,
-                                    per_page,
-                                    period)
+    page = 1
+    pages_number = 50
     all_vacancies = []
-    for page in range(pages_number):
+    while page < pages_number:
         params = {
             'text': lang,
             'area': area,
@@ -20,7 +18,10 @@ def get_vacancies_from_hh(lang, area, per_page, period):
         response = requests.get('https://api.hh.ru/vacancies', params=params)
         response.raise_for_status()
         vacancies = response.json()
+        pages_number = vacancies['pages']
         all_vacancies.extend(vacancies['items'])
+        print(pages_number, page)
+        page += 1
     return all_vacancies, vacancies['found']
 
 
@@ -31,16 +32,16 @@ def get_average_salary_hh(programming_languages):
     salaries_by_lang = {}
     for programming_language in programming_languages:
         vacancies_processed = 0
-        salaries = 0
+        salary_sum = 0
         all_vacancies, vacancies_found = get_vacancies_from_hh(
             programming_language, area, vacancies_per_page, period)
         for vacancy in all_vacancies:
             salary = predict_rub_salary_hh(vacancy['salary'])
             if salary:
                 vacancies_processed += 1
-                salaries += salary
+                salary_sum += salary
         average_salary = count_processed_vacancies(vacancies_processed,
-                                                   salaries)
+                                                   salary_sum)
         salaries_by_lang[programming_language] = {
             'vacancies_processed': vacancies_processed,
             'vacancies_found': vacancies_found,
