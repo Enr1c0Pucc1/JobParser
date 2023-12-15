@@ -20,7 +20,6 @@ def get_vacancies_from_hh(lang, area, per_page, period):
         vacancies = response.json()
         pages_number = vacancies['pages']
         all_vacancies.extend(vacancies['items'])
-        print(pages_number, page)
         page += 1
     return all_vacancies, vacancies['found']
 
