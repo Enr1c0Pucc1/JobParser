@@ -42,8 +42,8 @@ def get_average_salary_sj(programming_languages, api_key):
                 if salary:
                     vacancies_processed += 1
                     salary_sum += salary
-            average_salary = count_processed_vacancies(vacancies_processed,
-                                                       salary_sum)
+        average_salary = count_processed_vacancies(vacancies_processed,
+                                                   salary_sum)
         salaries_by_lang[programming_language] = {
             'vacancies_processed': vacancies_processed,
             'vacancies_found': vacancies_found,
